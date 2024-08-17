@@ -124,6 +124,10 @@ def upvote(report_id):
     if user_id in report.get('upvoters', []):
         return jsonify({'message': 'You have already upvoted this report'}), 400
 
+    # Do not allow upvoting if the user has already downvoted
+    if user_id in report.get('downvoters', []):
+        return jsonify({'message': 'You have already downvoted this report'}), 400
+    
     reports.update_one(
         {'_id': ObjectId(report_id)},
         {
@@ -146,6 +150,10 @@ def downvote(report_id):
     # Avoid double voting (optional feature)
     if user_id in report.get('downvoters', []):
         return jsonify({'message': 'You have already downvoted this report'}), 400
+    
+    # Do not allow downvoting if the user has already upvoted
+    if user_id in report.get('upvoters', []):
+        return jsonify({'message': 'You have already upvoted this report'}), 400
 
     reports.update_one(
         {'_id': ObjectId(report_id)},
