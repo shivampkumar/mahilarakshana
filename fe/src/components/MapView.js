@@ -7,9 +7,10 @@ import goldIcon from './assets/gold-icon.png';
 import dullIcon from './assets/dull-icon.png'
 
 function MapView() {
+  console.log("KEYY",process.env)
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.MAPS_KEY
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY
   });
 
   const containerStyle = {

@@ -1,3 +1,5 @@
 be/venv
 be/.env
+fe/src/.env
+fe/.env
 fe/node_modules
