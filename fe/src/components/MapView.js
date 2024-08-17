@@ -238,7 +238,7 @@ function MapView({ incidents, setIncidents }) {
             zoom={center.zoom}
             options={mapOptions}
             onLoad={onLoad}
-            onBoundsChanged={onBoundsChanged}
+            // onBoundsChanged={onBoundsChanged}
           >
             {incidents.map((incident, index) => (
               <Marker
