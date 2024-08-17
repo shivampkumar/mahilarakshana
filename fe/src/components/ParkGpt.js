@@ -26,7 +26,7 @@ function ParkGpt() {
             max_tokens: 60
         }, {
             headers: {
-                'Authorization': `Bearer `
+                'Authorization': `Bearer ` //replace with new openai api key to help with profile descriptions creation
             }
         });
 

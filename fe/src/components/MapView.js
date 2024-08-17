@@ -13,18 +13,17 @@ function MapView() {
   });
 
   const containerStyle = {
-    width: '420px',
-    height: '890px'
+    width: '1200px',
+    height: '950px'
   };
 
   const [userLocation, setUserLocation] = React.useState(null);
-  const [selectedPlace, setSelectedPlace] = React.useState(null);
-
-  const center = {
+  const [center, setCenter] = React.useState({
     lat: 40.7829,
     lng: -73.9654,
     zoom: 14,
-  };
+  });
+  const [selectedPlace, setSelectedPlace] = React.useState(null);
 
   const mapOptions = {
     styles: [
@@ -102,13 +101,28 @@ function MapView() {
   ];
 
   React.useEffect(() => {
-    console.log("Icon Credits: FlatIcon")
-    navigator.geolocation.getCurrentPosition(function (position) {
-      setUserLocation({
-        lat: userLock.latitude,
-        lng: userLock.longitude,
-      });
-    });
+    // console.log("Icon Credits: FlatIcon")
+    // navigator.geolocation.getCurrentPosition(function (position) {
+    //   setUserLocation({
+    //     lat: userLock.latitude,
+    //     lng: userLock.longitude,
+    //   });
+    // });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({
+          lat: latitude,
+          lng: longitude,
+        });
+        setCenter({
+          lat: latitude,
+          lng: longitude,
+          zoom: 14,
+        });
+      },
+      (error) => console.error('Error fetching location', error)
+    );
   }, []);
 
   const [map, setMap] = React.useState(null);
