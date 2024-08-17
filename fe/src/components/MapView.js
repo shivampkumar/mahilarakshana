@@ -10,8 +10,8 @@ function MapView({ incidents, setIncidents }) {
   });
 
   const containerStyle = {
-    width: '650px',
-    height: '950px'
+    width: '100%',
+    height: '100vh', // Full height for mobile view
   };
 
   const [userLocation, setUserLocation] = useState(null);
@@ -235,8 +235,7 @@ function MapView({ incidents, setIncidents }) {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
-    <div style={{ flex: 1, minWidth: '300px' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       {isLoaded && (
         <GoogleMap
           mapContainerStyle={containerStyle}
@@ -244,6 +243,7 @@ function MapView({ incidents, setIncidents }) {
           zoom={center.zoom}
           options={mapOptions}
           onLoad={onLoad}
+          onBoundsChanged={onBoundsChanged}
         >
           {incidents.map((incident, index) => (
             <Marker
@@ -289,72 +289,72 @@ function MapView({ incidents, setIncidents }) {
           )}
         </GoogleMap>
       )}
-    </div>
-    <div style={{ marginLeft: '2%', flex: '0 1 300px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <button 
-        onClick={handleReportButtonClick} 
-        style={{ marginBottom: '1rem', padding: '0.8rem 1.6rem', fontSize: '1rem' }}
-      >
-        Create Report
-      </button>
-      <button
-        style={{
-          backgroundColor: 'red',
-          color: 'white',
-          padding: '0.8rem 1.6rem',
-          fontSize: '1rem',
-          fontWeight: 'bold',
-          border: 'none',
-          cursor: 'pointer',
-          borderRadius: '0.5rem',
-          marginBottom: '1rem'
-        }}
-        onClick={handleSOSClick}
-      >
-        SOS
-      </button>
+      <div style={{ position: 'absolute', bottom: '20px', right: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <button 
+          onClick={handleReportButtonClick} 
+          style={{ marginBottom: '10px', padding: '10px 20px', fontSize: '14px' }}
+        >
+          Create Report
+        </button>
+        <button
+          style={{
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '10px 20px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius: '5px'
+          }}
+          onClick={handleSOSClick}
+        >
+          SOS
+        </button>
+      </div>
       {showReportForm && (
-        <form onSubmit={handleSubmitReport} style={{ textAlign: 'center' }}>
-          <div>
-            <label>GPS Coordinate:</label>
-            <input
-              type="text"
-              name="gpsCoordinate"
-              value={reportDetails.gpsCoordinate}
-              onChange={handleFormChange}
-              style={{ marginBottom: '1rem', padding: '0.5rem' }}
-            />
-          </div>
-          <div>
-            <label>Description:</label>
-            <textarea
-              name="description"
-              value={reportDetails.description}
-              onChange={handleFormChange}
-              required
-              style={{  marginBottom: '1rem', padding: '0.5rem' }}
-            />
-          </div>
-          <div>
-            <label>Severity:</label>
-            <select
-              name="severity"
-              value={reportDetails.severity}
-              onChange={handleFormChange}
-              required
-              style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
-            >
-              <option value="">Select Severity</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-          <button type="submit" style={{ padding: '0.8rem 1.6rem' }}>Submit Report</button>
-        </form>
+        <div style={{ position: 'absolute', bottom: '100px', right: '20px', backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
+          <form onSubmit={handleSubmitReport} style={{ textAlign: 'center' }}>
+            <div>
+              <label>GPS Coordinate:</label>
+              <input
+                type="text"
+                name="gpsCoordinate"
+                value={reportDetails.gpsCoordinate}
+                onChange={handleFormChange}
+                style={{ marginBottom: '10px', padding: '5px', width: '100%' }}
+              />
+            </div>
+            <div>
+              <label>Description:</label>
+              <textarea
+                name="description"
+                value={reportDetails.description}
+                onChange={handleFormChange}
+                required
+                style={{ marginBottom: '10px', padding: '5px', width: '100%' }}
+              />
+            </div>
+            <div>
+              <label>Severity:</label>
+              <select
+                name="severity"
+                value={reportDetails.severity}
+                onChange={handleFormChange}
+                required
+                style={{ width: '100%', marginBottom: '10px', padding: '5px' }}
+              >
+                <option value="">Select Severity</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <button type="submit" style={{ padding: '10px 20px' }}>Submit Report</button>
+          </form>
+        </div>
       )}
     </div>
-  </div>
   );
 }
 
