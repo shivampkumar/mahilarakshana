@@ -235,7 +235,7 @@ function MapView({ incidents, setIncidents }) {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
     <div style={{ flex: 1, minWidth: '300px' }}>
       {isLoaded && (
         <GoogleMap
@@ -314,7 +314,7 @@ function MapView({ incidents, setIncidents }) {
         SOS
       </button>
       {showReportForm && (
-        <form onSubmit={handleSubmitReport} style={{ width: '100%', textAlign: 'center' }}>
+        <form onSubmit={handleSubmitReport} style={{ textAlign: 'center' }}>
           <div>
             <label>GPS Coordinate:</label>
             <input
@@ -322,7 +322,7 @@ function MapView({ incidents, setIncidents }) {
               name="gpsCoordinate"
               value={reportDetails.gpsCoordinate}
               onChange={handleFormChange}
-              style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+              style={{ marginBottom: '1rem', padding: '0.5rem' }}
             />
           </div>
           <div>
@@ -332,7 +332,7 @@ function MapView({ incidents, setIncidents }) {
               value={reportDetails.description}
               onChange={handleFormChange}
               required
-              style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+              style={{  marginBottom: '1rem', padding: '0.5rem' }}
             />
           </div>
           <div>
