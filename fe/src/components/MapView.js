@@ -4,7 +4,7 @@ import Icon1 from './assets/download.png';
 import bronzeIcon from './assets/bronze-icon.png';
 import silverIcon from './assets/silver-icon.png';
 import goldIcon from './assets/gold-icon.png';
-import dullIcon from './assets/dull-icon.png'
+import dullIcon from './assets/dull-icon.png';
 
 function MapView({ incidents, setIncidents }) {
   const { isLoaded } = useJsApiLoader({
@@ -19,11 +19,9 @@ function MapView({ incidents, setIncidents }) {
 
   const [userLocation, setUserLocation] = useState(null);
   const [center, setCenter] = useState({
-    // lat: 37.773972,
-    // lng: -122.431297,
     lat: '',
     lng: '',
-    zoom: '', //changing the zoom value seems to alter the default starting location on the map
+    zoom: 15, // Default zoom value
   });
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
@@ -48,74 +46,7 @@ function MapView({ incidents, setIncidents }) {
     heading: 30,
   };
 
-  const bounds = {
-    north: 40.8005,
-    south: 40.7646,
-    east: -73.9499,
-    west: -73.9815,
-  };
-
-  const userLock = {
-    latitude: 40.7794,
-    longitude: -73.9689
-  };
-
-  const locations = [
-    {
-      name: 'Bethesda Fountain',
-      location: {
-        lat: 40.7740,
-        lng: -73.9708
-      },
-      info: 'Beautiful fountain located in Central Park.',
-      visits: 3
-    },
-    {
-      name: 'Belvedere Castle',
-      location: {
-        lat: 40.7794,
-        lng: -73.9690
-      },
-      info: 'Scenic castle with panoramic views of Central Park.',
-      visits: 7
-    },
-    {
-      name: 'Central Park Zoo',
-      location: {
-        lat: 40.7678,
-        lng: -73.9718
-      },
-      info: 'Charming zoo featuring a variety of animals.',
-      visits: 12
-    },
-    {
-      name: 'Strawberry Fields',
-      location: {
-        lat: 40.7757,
-        lng: -73.9748
-      },
-      info: 'Peaceful memorial dedicated to John Lennon.',
-      visits: 2
-    },
-    {
-      name: 'The Ramble',
-      location: {
-        lat: 40.7790,
-        lng: -73.9696
-      },
-      info: 'Tranquil wooded area with scenic paths.',
-      visits: 15
-    }
-  ];
-
-  React.useEffect(() => {
-    // console.log("Icon Credits: FlatIcon")
-    // navigator.geolocation.getCurrentPosition(function (position) {
-    //   setUserLocation({
-    //     lat: userLock.latitude,
-    //     lng: userLock.longitude,
-    //   });
-    // });
+  useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -172,43 +103,10 @@ function MapView({ incidents, setIncidents }) {
       .catch((error) => console.error('Error:', error));
   };
 
-
-  const [map, setMap] = React.useState(null);
+  const [map, setMap] = useState(null);
   const [selectedIncident, setSelectedIncident] = useState(null);
-  // const onLoad = React.useCallback(function callback(map) {
-  //   const bounds = new window.google.maps.LatLngBounds(center);
-  //   map.fitBounds(bounds);
 
-  //   setMap(map);
-  // }, []);
-
-  const onUnmount = React.useCallback(function callback(map) {
-    setMap(null);
-  }, []);
-
-  // const handleMarkerClick = (place) => {
-  //   setSelectedPlace(place);
-  // };
-
-  // const handleInfoWindowClose = () => {
-  //   setSelectedPlace(null);
-  // };
-
-  const getMarkerIcon = (visits) => {
-    if (visits === 0) {
-      // Return a dull icon for places that have not been visited
-      return dullIcon;
-    } else if (visits < 5) {
-      return bronzeIcon;
-    } else if (visits < 10) {
-      return silverIcon;
-    } else {
-      return goldIcon;
-    }
-  };
-
-
-  const fetchIncidents = (bounds) => {
+  const fetchIncidents = useCallback((bounds) => {
     if (!bounds) {
       console.error('Map bounds are not available.');
       return;
@@ -241,20 +139,24 @@ function MapView({ incidents, setIncidents }) {
         setIncidents(data);  // Update the incidents in the parent component
       })
       .catch((error) => console.error('Error:', error));
-    // console.log("Incidents:", incidents);
-  };
+  }, [setIncidents]);
 
-  const onLoad = useCallback((mapInstance) => { 
+  const onLoad = useCallback((mapInstance) => {
     setMap(mapInstance);
 
-    // Delay the fetch to ensure the bounds are ready
     setTimeout(() => {
       const bounds = mapInstance.getBounds();
       fetchIncidents(bounds);
     }, 500); // Adjust delay as necessary
-  }, []);
+  }, [fetchIncidents]);
 
-  
+  const onBoundsChanged = useCallback(() => {
+    if (map) {
+      const bounds = map.getBounds();
+      fetchIncidents(bounds);
+    }
+  }, [map, fetchIncidents]);
+
   const handleMarkerClick = (incident) => {
     setSelectedIncident(incident);
   };
@@ -262,14 +164,6 @@ function MapView({ incidents, setIncidents }) {
   const handleInfoWindowClose = () => {
     setSelectedIncident(null);
   };
-
-  const onBoundsChanged = useCallback(() => {
-    if (map) {
-      const bounds = map.getBounds();
-      fetchIncidents(bounds);
-    }
-  }, [map]);
-  
 
   return (
     <div style={{ display: 'flex' }}>
@@ -281,7 +175,7 @@ function MapView({ incidents, setIncidents }) {
             zoom={center.zoom}
             options={mapOptions}
             onLoad={onLoad}
-            // onBoundsChanged={onBoundsChanged}
+            onBoundsChanged={onBoundsChanged}
           >
             {incidents.map((incident, index) => (
               <Marker
@@ -303,13 +197,6 @@ function MapView({ incidents, setIncidents }) {
                 </div>
               </InfoWindow>
             )}
-            {locations.map((location, i) => (
-              <Marker
-                key={i}
-                position={location.location}
-                title={location.name}
-              />
-            ))}
             {userLocation && (
               <Marker
                 position={userLocation}
@@ -372,47 +259,6 @@ function MapView({ incidents, setIncidents }) {
       </div>
     </div>
   );
-
-  // return isLoaded ? (
-  //   <GoogleMap
-  //     mapContainerStyle={containerStyle}
-  //     center={center}
-  //     zoom={center.zoom}
-  //     onLoad={onLoad}
-  //     onUnmount={onUnmount}
-  //     options={mapOptions}
-  //   >
-  //     {locations.map((location, i) => (
-  //       <Marker
-  //         key={i}
-  //         position={location.location}
-  //         title={location.name}
-  //         icon={getMarkerIcon(location.visits)}
-  //         onClick={() => handleMarkerClick(location)}
-  //       />
-  //     ))}
-  //     {userLocation && (
-  //       <Marker
-  //         position={userLocation}
-  //         icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }}
-  //       />
-  //     )}
-  //     {selectedPlace && (
-  //       <InfoWindow
-  //         position={selectedPlace.location}
-  //         onCloseClick={handleInfoWindowClose}
-  //       >
-  //         <div>
-  //           <h4>{selectedPlace.name}</h4>
-  //           <p>{selectedPlace.info}</p>
-  //           <p>Visits: {selectedPlace.visits}</p>
-  //         </div>
-  //       </InfoWindow>
-  //     )}
-  //   </GoogleMap>
-  // ) : (
-  //   <></>
-  // );
 }
 
 export default React.memo(MapView);

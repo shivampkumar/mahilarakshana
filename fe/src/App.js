@@ -11,9 +11,9 @@ import axios from 'axios';
 
 function App() {
   const [incidents, setIncidents] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [tabValue, setTabValue] = useState('login');
-  const [userId, setUserId] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('user_id')); // Load login state from localStorage
+  const [tabValue, setTabValue] = useState(isLoggedIn ? 'Map' : 'login'); // Default to 'Map' if logged in
+  const [userId, setUserId] = useState(localStorage.getItem('user_id') || '');
   const [safetyContacts, setSafetyContacts] = useState([]);
 
   const API_BASE_URL = 'http://20.168.8.23:8080/api';
@@ -26,6 +26,9 @@ function App() {
       setSafetyContacts([response.data.safety_contact_1, response.data.safety_contact_2]);
       setIsLoggedIn(true);
       setTabValue('Map'); // Switch to Map tab after login
+
+      // Persist login state in localStorage
+      localStorage.setItem('user_id', response.data.user_id);
     } catch (error) {
       console.error(error);
       alert('Login failed');
@@ -49,6 +52,12 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      setTabValue('Map');
+    }
+  }, [isLoggedIn]);
+
   const renderUserView = () => {
     if (!isLoggedIn) {
       return (
@@ -69,7 +78,8 @@ function App() {
     } else {
       return (
         <Tabs
-          defaultActiveKey="Map"
+          activeKey={tabValue}
+          onSelect={(k) => setTabValue(k)}
           id="bottom-menu-tabs"
           className="bottom-menu-bar"
         >
