@@ -1,0 +1,39 @@
+.store-container {
+    padding: 20px;
+  }
+  
+  .store-tabs {
+    border-bottom: none;
+  }
+  
+  .store-tab {
+    padding: 10px 20px;
+    background-color: #f9f9f9;
+    border: none;
+    border-radius: 10px;
+  }
+  
+  .store-card {
+    border: none;
+    background-color: transparent;
+  }
+  
+  .store-section-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .store-item-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .store-item {
+    font-size: 18px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  

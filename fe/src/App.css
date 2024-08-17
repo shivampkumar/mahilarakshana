@@ -1,0 +1,51 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bottom-menu-bar {
+  display: flex;
+  flex-shrink: 0;
+  border-top: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.tab-content {
+  flex-grow: 1; /* Allow content to take up remaining vertical space */
+  display: flex;
+  flex-direction: column;
+}
+
+.map-view {
+  flex-grow: 1; /* Fill available vertical space within the tab content */
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding-bottom: 56px; /* Adjust based on the height of your mobile device's bottom navigation bar */
+  }
+
+  .bottom-menu-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 56px; /* Adjust based on the height of your mobile device's bottom navigation bar */
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    z-index: 10;
+  }
+
+  .content-container {
+    padding-bottom: 56px; /* Adjust based on the height of your mobile device's bottom navigation bar */
+  }
+}

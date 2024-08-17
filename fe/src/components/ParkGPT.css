@@ -1,0 +1,29 @@
+.parkgpt-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .answer-text {
+    margin-top: 10px;
+  }
+  
+  .plant-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .plant-image {
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  
+  .plant-name {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+  }
+  

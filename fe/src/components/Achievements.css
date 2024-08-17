@@ -1,0 +1,30 @@
+.achievements-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .milestone-item,
+  .task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .milestone-name,
+  .task-name {
+    font-weight: bold;
+  }
+  
+  .milestone-item {
+    color: #0d6efd;
+  }
+  
+  .task-item {
+    color: #dc3545;
+  }
+  
+  .task-points {
+    font-weight: bold;
+  }
+  
