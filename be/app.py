@@ -94,10 +94,12 @@ def report():
     nearby_reports = list(reports.find({
         'gpsCoordinate': {
             '$geoWithin': {
-                '$centerSphere': [coordinates, 0.001]  # ~111 meters radius
+                '$centerSphere': [coordinates, 0.002]  # ~111 meters radius
             }
         }
     }))
+
+    print("Nearby reports", nearby_reports)
     
     # Compare descriptions for similarity
     similar_report = None
