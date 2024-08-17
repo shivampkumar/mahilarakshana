@@ -2,18 +2,23 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from flask_bcrypt import Bcrypt
 from pymongo import MongoClient
-# from bson import ObjectId
+from bson import ObjectId
 from urllib.parse import quote_plus
 import os
 from dotenv import load_dotenv
-load_dotenv()
 from datetime import datetime
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
-print("Name",__name__)
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+# Initialize Bcrypt for password hashing
 bcrypt = Bcrypt(app)
+
+# Get MongoDB credentials from environment variables
 username = os.environ.get('MONGO_USERNAME')
 password = os.environ.get('MONGO_PASSWORD')
 username = quote_plus(username)
@@ -22,23 +27,28 @@ password = quote_plus(password)
 # MongoDB setup
 uri = f"mongodb+srv://{username}:{password}@safeway.4elzu.mongodb.net/?retryWrites=true&w=majority&appName=safeway"
 client = MongoClient(uri)
-
 db = client.safeway_db
 users = db.users
 reports = db.reports
 
-@app.route('/api/register', methods=['POST','OPTIONS'])
+@app.route('/api/register', methods=['POST', 'OPTIONS'])
 @cross_origin()
 def register():
     user_data = request.json
+    # Use generate_password_hash to hash the password
     user_data['password'] = bcrypt.generate_password_hash(user_data['password']).decode('utf-8')
     
     # Check if user already exists
     if users.find_one({'email': user_data['email']}):
         return jsonify({'message': 'User already exists'}), 400
     
+    # Generate a unique user ID and record creation time
+    user_data['user_id'] = str(ObjectId())
+    user_data['created_at'] = datetime.utcnow()
+
+    # Insert the new user into the database
     users.insert_one(user_data)
-    return jsonify({'message': 'User registered successfully'}), 201
+    return jsonify({'message': 'User registered successfully', 'user_id': user_data['user_id']}), 201
 
 @app.route('/api/login', methods=['POST', 'OPTIONS'])
 @cross_origin()
@@ -47,7 +57,12 @@ def login():
     user = users.find_one({'email': user_data['email']})
 
     if user and bcrypt.check_password_hash(user['password'], user_data['password']):
-        return jsonify({'message': 'Login successful'}), 200
+        return jsonify({
+            'message': 'Login successful',
+            'user_id': user['user_id'],
+            'safety_contact_1': user.get('safety_contact_1'),
+            'safety_contact_2': user.get('safety_contact_2')
+        }), 200
     else:
         return jsonify({'message': 'Invalid credentials'}), 401
     
