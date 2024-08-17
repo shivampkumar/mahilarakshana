@@ -9,7 +9,7 @@ import dullIcon from './assets/dull-icon.png'
 function MapView() {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: ''
+    googleMapsApiKey: process.env.MAPS_KEY
   });
 
   const containerStyle = {

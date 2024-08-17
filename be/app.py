@@ -8,8 +8,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from datetime import datetime
-import json
-import time
 
 app = Flask(__name__)
 print("Name",__name__)
