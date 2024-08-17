@@ -32,12 +32,12 @@ function App() {
               <Store></Store>
             </div>
           </Tab>
-          <Tab eventKey="parkgpt" title="ParkGPT">
+          {/* <Tab eventKey="parkgpt" title="ParkGPT">
             <div className="tab-content">
               <h2>ParkGPT</h2>
               <ParkGpt/>
             </div>
-          </Tab>
+          </Tab> */}
         </Tabs>
       </div>
     </div>
