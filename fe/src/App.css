@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: beige;
 }
 
 .content-container {
@@ -15,7 +16,7 @@
   display: flex;
   flex-shrink: 0;
   border-top: 1px solid #ddd;
-  background-color: #f9f9f9;
+  background-color: tan;
 }
 
 .tab-content {

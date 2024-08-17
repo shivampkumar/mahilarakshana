@@ -12,23 +12,23 @@ function App() {
       <div className="content-container">
         {/* Content for each tab */}
         <Tabs
-          defaultActiveKey="go"
+          defaultActiveKey="Map"
           id="bottom-menu-tabs"
           className="bottom-menu-bar"
         >
-          <Tab eventKey="go" title="Go">
+          <Tab eventKey="Map" title="MapView">
             <div className="tab-content">
               <MapView />
             </div>
           </Tab>
-          <Tab eventKey="achievements" title="Achievements">
+          <Tab eventKey="incidents" title="Incidents">
             <div className="tab-content">
               <Achievements></Achievements>
             </div>
           </Tab>
-          <Tab eventKey="store" title="Store">
+          <Tab eventKey="trustedcontacts" title="Contacts">
             <div className="tab-content">
-              <h2>Store</h2>
+              <h2>Emergency Contacts</h2>
               <Store></Store>
             </div>
           </Tab>
