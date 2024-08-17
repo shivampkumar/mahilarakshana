@@ -225,108 +225,127 @@ function MapView({ incidents, setIncidents }) {
     setSelectedIncident(incident);
   };
 
+  const handleSOSClick = (incident) => {
+    setSelectedIncident(incident);
+    console.log("sending SOS to trusted contacts");
+  };
+
   const handleInfoWindowClose = () => {
     setSelectedIncident(null);
   };
 
   return (
     <div style={{ display: 'flex' }}>
-      <div>
-        {isLoaded && (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={center.zoom}
-            options={mapOptions}
-            onLoad={onLoad}
-            // onBoundsChanged={onBoundsChanged}
-          >
-            {incidents.map((incident, index) => (
-              <Marker
-                key={index}
-                position={{ lat: incident.gpsCoordinate[1], lng: incident.gpsCoordinate[0] }}
-                icon={cautionIcon}
-                onClick={() => handleMarkerClick(incident)}
-              />
-            ))}
+    <div>
+      {isLoaded && (
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={center}
+          zoom={center.zoom}
+          options={mapOptions}
+          onLoad={onLoad}
+        >
+          {incidents.map((incident, index) => (
+            <Marker
+              key={index}
+              position={{ lat: incident.gpsCoordinate[1], lng: incident.gpsCoordinate[0] }}
+              icon={cautionIcon}
+              onClick={() => handleMarkerClick(incident)}
+            />
+          ))}
 
-            {selectedIncident && selectedIncident.gpsCoordinate && (
-              <InfoWindow
-                position={{ lat: selectedIncident.gpsCoordinate[1], lng: selectedIncident.gpsCoordinate[0] }}
-                onCloseClick={handleInfoWindowClose}
-              >
-                <div>
-                  <h4>{selectedIncident.description}</h4>
-                  <p>Severity: {selectedIncident.severity}</p>
-                  <p>Timestamp: {new Date(selectedIncident.timestamp).toLocaleString()}</p>
-                  <p>Upvotes: {selectedIncident.upvotes || 0}</p>
-                  <p>Downvotes: {selectedIncident.downvotes || 0}</p>
-                  <button onClick={() => handleUpvote(selectedIncident._id)}>Upvote</button>
-                  <button onClick={() => handleDownvote(selectedIncident._id)}>Downvote</button>
-                </div>
-              </InfoWindow>
-            )}
-            {userLocation && (
-              <Marker
-                position={userLocation}
-                icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }}
-              />
-            )}
-            {selectedPlace && (
-              <InfoWindow
-                position={selectedPlace.location}
-                onCloseClick={() => setSelectedPlace(null)}
-              >
-                <div>
-                  <h4>{selectedPlace.name}</h4>
-                  <p>{selectedPlace.info}</p>
-                </div>
-              </InfoWindow>
-            )}
-          </GoogleMap>
-        )}
-      </div>
-      <div style={{ marginLeft: '20px' }}>
-        <button onClick={handleReportButtonClick}>Create Report</button>
-        {showReportForm && (
-          <form onSubmit={handleSubmitReport} style={{ marginTop: '20px' }}>
-            <div>
-              <label>GPS Coordinate:</label>
-              <input
-                type="text"
-                name="gpsCoordinate"
-                value={reportDetails.gpsCoordinate}
-                readOnly
-              />
-            </div>
-            <div>
-              <label>Description:</label>
-              <textarea
-                name="description"
-                value={reportDetails.description}
-                onChange={handleFormChange}
-                required
-              />
-            </div>
-            <div>
-              <label>Severity:</label>
-              <select
-                name="severity"
-                value={reportDetails.severity}
-                onChange={handleFormChange}
-                required
-              >
-                <option value="">Select Severity</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-            <button type="submit">Submit Report</button>
-          </form>
-        )}
-      </div>
+          {selectedIncident && selectedIncident.gpsCoordinate && (
+            <InfoWindow
+              position={{ lat: selectedIncident.gpsCoordinate[1], lng: selectedIncident.gpsCoordinate[0] }}
+              onCloseClick={handleInfoWindowClose}
+            >
+              <div>
+                <h4>{selectedIncident.description}</h4>
+                <p>Severity: {selectedIncident.severity}</p>
+                <p>Timestamp: {new Date(selectedIncident.timestamp).toLocaleString()}</p>
+                <p>Upvotes: {selectedIncident.upvotes || 0}</p>
+                <p>Downvotes: {selectedIncident.downvotes || 0}</p>
+                <button onClick={() => handleUpvote(selectedIncident._id)}>Upvote</button>
+                <button onClick={() => handleDownvote(selectedIncident._id)}>Downvote</button>
+              </div>
+            </InfoWindow>
+          )}
+          {userLocation && (
+            <Marker
+              position={userLocation}
+              icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }}
+            />
+          )}
+          {selectedPlace && (
+            <InfoWindow
+              position={selectedPlace.location}
+              onCloseClick={() => setSelectedPlace(null)}
+            >
+              <div>
+                <h4>{selectedPlace.name}</h4>
+                <p>{selectedPlace.info}</p>
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMap>
+      )}
     </div>
+    <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column' }}>
+      <button onClick={handleReportButtonClick} style={{ marginBottom: '20px' }}>Create Report</button>
+      <button
+        style={{
+          backgroundColor: 'red',
+          color: 'white',
+          padding: '10px 20px',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          border: 'none',
+          cursor: 'pointer',
+          borderRadius: '5px'
+        }}
+        onClick={handleSOSClick}
+      >
+        SOS
+      </button>
+      {showReportForm && (
+        <form onSubmit={handleSubmitReport} style={{ marginTop: '20px' }}>
+          <div>
+            <label>GPS Coordinate:</label>
+            <input
+              type="text"
+              name="gpsCoordinate"
+              value={reportDetails.gpsCoordinate}
+              readOnly
+            />
+          </div>
+          <div>
+            <label>Description:</label>
+            <textarea
+              name="description"
+              value={reportDetails.description}
+              onChange={handleFormChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Severity:</label>
+            <select
+              name="severity"
+              value={reportDetails.severity}
+              onChange={handleFormChange}
+              required
+            >
+              <option value="">Select Severity</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <button type="submit">Submit Report</button>
+        </form>
+      )}
+    </div>
+  </div>
   );
 }
 
