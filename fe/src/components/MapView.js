@@ -6,8 +6,7 @@ import silverIcon from './assets/silver-icon.png';
 import goldIcon from './assets/gold-icon.png';
 import dullIcon from './assets/dull-icon.png'
 
-function MapView() {
-  console.log("KEYY",process.env)
+function MapView({ setIncidents }) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: 'AIzaSyCQxNdJeOBALdHCKwnuOaDJgCSyE0jEKrA'
@@ -20,9 +19,11 @@ function MapView() {
 
   const [userLocation, setUserLocation] = useState(null);
   const [center, setCenter] = useState({
-    lat: 40.7829,
-    lng: -73.9654,
-    zoom: 12,
+    // lat: 37.773972,
+    // lng: -122.431297,
+    lat: '',
+    lng: '',
+    zoom: '', //changing the zoom value seems to alter the default starting location on the map
   });
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
@@ -125,7 +126,7 @@ function MapView() {
         setCenter({
           lat: latitude,
           lng: longitude,
-          zoom: 14,
+          zoom: 15,
         });
       },
       (error) => console.error('Error fetching location', error)
@@ -174,12 +175,12 @@ function MapView() {
 
   const [map, setMap] = React.useState(null);
 
-  const onLoad = React.useCallback(function callback(map) {
-    const bounds = new window.google.maps.LatLngBounds(center);
-    map.fitBounds(bounds);
+  // const onLoad = React.useCallback(function callback(map) {
+  //   const bounds = new window.google.maps.LatLngBounds(center);
+  //   map.fitBounds(bounds);
 
-    setMap(map);
-  }, []);
+  //   setMap(map);
+  // }, []);
 
   const onUnmount = React.useCallback(function callback(map) {
     setMap(null);
@@ -205,6 +206,60 @@ function MapView() {
       return goldIcon;
     }
   };
+
+
+  const fetchIncidents = (bounds) => {
+    if (!bounds) {
+      console.error('Map bounds are not available.');
+      return;
+    }
+
+    const topLeft = {
+      lat: bounds.getNorthEast().lat(),
+      lng: bounds.getSouthWest().lng(),
+    };
+    const bottomRight = {
+      lat: bounds.getSouthWest().lat(),
+      lng: bounds.getNorthEast().lng(),
+    };
+
+    console.log("Top Left:", topLeft);
+    console.log("Bottom Right:", bottomRight);
+
+    fetch('http://20.168.8.23:8080/api/get_problems', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        top_left: topLeft,
+        bottom_right: bottomRight,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setIncidents(data);  // Update the incidents in the parent component
+      })
+      .catch((error) => console.error('Error:', error));
+    // console.log("Incidents:", incidents);
+  };
+
+  const onLoad = useCallback((mapInstance) => {
+    setMap(mapInstance);
+
+    // Delay the fetch to ensure the bounds are ready
+    setTimeout(() => {
+      const bounds = mapInstance.getBounds();
+      fetchIncidents(bounds);
+    }, 1000); // Adjust delay as necessary
+  }, []);
+
+  const onBoundsChanged = useCallback(() => {
+    if (map) {
+      const bounds = map.getBounds();
+      fetchIncidents(bounds);
+    }
+  }, [map]);
   
 
   return (
@@ -216,6 +271,8 @@ function MapView() {
             center={center}
             zoom={center.zoom}
             options={mapOptions}
+            onLoad={onLoad}
+            // onBoundsChanged={onBoundsChanged}
           >
             {locations.map((location, i) => (
               <Marker

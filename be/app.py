@@ -87,6 +87,9 @@ def get_problems():
 
     return jsonify(problems), 200
 
+#set up endpoint to save trusted contacts:
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port= 8080, debug=True)
