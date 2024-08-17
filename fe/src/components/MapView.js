@@ -6,7 +6,7 @@ import silverIcon from './assets/silver-icon.png';
 import goldIcon from './assets/gold-icon.png';
 import dullIcon from './assets/dull-icon.png'
 
-function MapView({ setIncidents }) {
+function MapView({ incidents, setIncidents }) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: 'AIzaSyCQxNdJeOBALdHCKwnuOaDJgCSyE0jEKrA'
@@ -174,7 +174,7 @@ function MapView({ setIncidents }) {
 
 
   const [map, setMap] = React.useState(null);
-
+  const [selectedIncident, setSelectedIncident] = useState(null);
   // const onLoad = React.useCallback(function callback(map) {
   //   const bounds = new window.google.maps.LatLngBounds(center);
   //   map.fitBounds(bounds);
@@ -186,13 +186,13 @@ function MapView({ setIncidents }) {
     setMap(null);
   }, []);
 
-  const handleMarkerClick = (place) => {
-    setSelectedPlace(place);
-  };
+  // const handleMarkerClick = (place) => {
+  //   setSelectedPlace(place);
+  // };
 
-  const handleInfoWindowClose = () => {
-    setSelectedPlace(null);
-  };
+  // const handleInfoWindowClose = () => {
+  //   setSelectedPlace(null);
+  // };
 
   const getMarkerIcon = (visits) => {
     if (visits === 0) {
@@ -244,15 +244,24 @@ function MapView({ setIncidents }) {
     // console.log("Incidents:", incidents);
   };
 
-  const onLoad = useCallback((mapInstance) => {
+  const onLoad = useCallback((mapInstance) => { 
     setMap(mapInstance);
 
     // Delay the fetch to ensure the bounds are ready
     setTimeout(() => {
       const bounds = mapInstance.getBounds();
       fetchIncidents(bounds);
-    }, 1000); // Adjust delay as necessary
+    }, 500); // Adjust delay as necessary
   }, []);
+
+  
+  const handleMarkerClick = (incident) => {
+    setSelectedIncident(incident);
+  };
+
+  const handleInfoWindowClose = () => {
+    setSelectedIncident(null);
+  };
 
   const onBoundsChanged = useCallback(() => {
     if (map) {
@@ -274,6 +283,26 @@ function MapView({ setIncidents }) {
             onLoad={onLoad}
             // onBoundsChanged={onBoundsChanged}
           >
+            {incidents.map((incident, index) => (
+              <Marker
+                key={index}
+                position={{ lat: incident.gpsCoordinate[1], lng: incident.gpsCoordinate[0] }}
+                onClick={() => handleMarkerClick(incident)}
+              />
+            ))}
+
+            {selectedIncident && selectedIncident.gpsCoordinate && (
+              <InfoWindow
+                position={{ lat: selectedIncident.gpsCoordinate[1], lng: selectedIncident.gpsCoordinate[0] }}
+                onCloseClick={handleInfoWindowClose}
+              >
+                <div>
+                  <h4>{selectedIncident.description}</h4>
+                  <p>Severity: {selectedIncident.severity}</p>
+                  <p>Timestamp: {new Date(selectedIncident.timestamp).toLocaleString()}</p>
+                </div>
+              </InfoWindow>
+            )}
             {locations.map((location, i) => (
               <Marker
                 key={i}

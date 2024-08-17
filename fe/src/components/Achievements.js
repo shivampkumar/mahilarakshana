@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, ListGroup, ProgressBar, Button } from 'react-bootstrap';
+import { Card, ListGroup, ProgressBar, Button, Row, Col } from 'react-bootstrap';
 import './Achievements.css';
 
 import bronzeIcon from './assets/bronze-icon.png';
@@ -8,24 +8,42 @@ import goldIcon from './assets/gold-icon.png';
 import dullIcon from './assets/dull-icon.png';
 
 function Achievements({ incidents }) {
+  console.log("incidents", incidents)
   return (
     <div className="achievements-container">
-      <Card>
+      <Card className="mt-4">
         <Card.Header as="h2">Incidents</Card.Header>
         <ListGroup variant="flush">
           {incidents.length > 0 ? (
             incidents.map((incident, index) => (
               <ListGroup.Item key={index}>
                 <div className="incident-item">
-                  <span className="incident-location">
-                    {incident.gpsCoordinate.lat}, {incident.gpsCoordinate.lng}
-                  </span>
-                  <span className="incident-description">
-                    {incident.description}
-                  </span>
-                  <span className="incident-severity">
-                    Severity: {incident.severity}
-                  </span>
+                  <Row className="mb-2">
+                    <Col xs={12} md={6}>
+                      <strong>Location:</strong> 
+                      <br />
+                      Lat: {incident.gpsCoordinate[1]}, Lng: {incident.gpsCoordinate[0]}
+                    </Col>
+                    <Col xs={12} md={6}>
+                      <strong>Severity:</strong> 
+                      <br />
+                      {incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}
+                    </Col>
+                  </Row>
+                  <Row className="mb-2">
+                    <Col xs={12}>
+                      <strong>Description:</strong> 
+                      <br />
+                      {incident.description}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs={12}>
+                      <strong>Timestamp:</strong> 
+                      <br />
+                      {new Date(incident.timestamp).toLocaleString()}
+                    </Col>
+                  </Row>
                 </div>
               </ListGroup.Item>
             ))

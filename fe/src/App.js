@@ -75,7 +75,7 @@ function App() {
         >
           <Tab eventKey="Map" title="MapView">
             <div className="tab-content">
-              <MapView setIncidents={setIncidents} />
+              <MapView incidents={incidents} setIncidents={setIncidents} />
             </div>
           </Tab>
           <Tab eventKey="incidents" title="Incidents">
