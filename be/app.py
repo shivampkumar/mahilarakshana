@@ -55,8 +55,13 @@ def login():
 @cross_origin()
 def report():
     report_data = request.json
-    report_data['timestamp'] = datetime.utcnow()  # Store the current timestamp
-    
+    coordinates = list(map(float, report_data['gpsCoordinate'].split(', ')))
+    # MongoDB expects [longitude, latitude]
+    coordinates = [coordinates[1], coordinates[0]]
+    print("coordinates",coordinates)
+    report_data['gpsCoordinate'] = coordinates
+    report_data['timestamp'] = datetime.utcnow()  # Store the current timestamp 
+    print("report_data",report_data)
     # Insert the report into the 'reports' collection
     reports.insert_one(report_data)
     return jsonify({'message': 'Report submitted successfully'}), 201
@@ -68,10 +73,11 @@ def get_problems():
     bounding_box = request.json
     top_left = bounding_box['top_left']
     bottom_right = bounding_box['bottom_right']
-
+    print("top_left",top_left)
+    print("bottom_right",bottom_right)
     # Query to find all reports within the bounding box
     problems = list(reports.find({
-        'gps_coordinate': {
+        'gpsCoordinate': {
             '$geoWithin': {
                 '$box': [
                     [top_left['lng'], bottom_right['lat']],  # bottom-left corner
@@ -80,6 +86,7 @@ def get_problems():
             }
         }
     }))
+    print("problems",problems)
 
     # Remove the MongoDB ObjectId and format the output
     for problem in problems:
