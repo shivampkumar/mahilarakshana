@@ -7,6 +7,8 @@ from urllib.parse import quote_plus
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+from sentence_transformers import SentenceTransformer  
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
 load_dotenv()
@@ -30,6 +32,18 @@ client = MongoClient(uri)
 db = client.safeway_db
 users = db.users
 reports = db.reports
+
+
+# Initialize the sentence transformer model (optional)
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def calculate_similarity(description1, description2):
+    # Vectorize the descriptions
+    embeddings1 = model.encode([description1])
+    embeddings2 = model.encode([description2])
+
+    # Compute cosine similarity
+    return cosine_similarity(embeddings1, embeddings2)[0][0]
 
 @app.route('/api/register', methods=['POST', 'OPTIONS'])
 @cross_origin()
@@ -73,15 +87,48 @@ def report():
     coordinates = list(map(float, report_data['gpsCoordinate'].split(', ')))
     # MongoDB expects [longitude, latitude]
     coordinates = [coordinates[1], coordinates[0]]
-    print("coordinates",coordinates)
     report_data['gpsCoordinate'] = coordinates
     report_data['timestamp'] = datetime.utcnow()  # Store the current timestamp
-    report_data['upvotes'] = 0  # Initialize upvotes
-    report_data['downvotes'] = 0  # Initialize downvotes
-    print("report_data", report_data)
-    # Insert the report into the 'reports' collection
-    reports.insert_one(report_data)
-    return jsonify({'message': 'Report submitted successfully'}), 201
+    
+    # Query for existing reports within a certain radius
+    nearby_reports = list(reports.find({
+        'gpsCoordinate': {
+            '$geoWithin': {
+                '$centerSphere': [coordinates, 0.001]  # ~111 meters radius
+            }
+        }
+    }))
+    
+    # Compare descriptions for similarity
+    similar_report = None
+    max_similarity = 0.0
+    similarity_threshold = 0.8  # You can adjust this threshold
+
+    for report in nearby_reports:
+        similarity = calculate_similarity(report_data['description'], report['description'])
+        if similarity > max_similarity:
+            max_similarity = similarity
+            similar_report = report
+
+    if similar_report and max_similarity >= similarity_threshold:
+        # Update the existing report instead of adding a new one
+        print("similar_report adding")
+        reports.update_one(
+            {'_id': similar_report['_id']},
+            {
+                '$set': {'description': f"{similar_report['description']} / {report_data['description']}"},
+                '$inc': {'upvotes': 1}
+            }
+        )
+        return jsonify({'message': 'Similar report found, updated the existing report.'}), 200
+    else:
+        print("new report creating")
+        # Insert as a new report
+        report_data['upvotes'] = 0  # Initialize upvotes
+        report_data['downvotes'] = 0  # Initialize downvotes
+        print("report_data", report_data)
+        reports.insert_one(report_data)
+        return jsonify({'message': 'Report submitted successfully'}), 201
 
 @app.route('/api/get_problems', methods=['POST'])
 @cross_origin()
