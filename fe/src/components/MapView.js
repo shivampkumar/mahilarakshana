@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import Icon1 from './assets/download.png';
 import bronzeIcon from './assets/bronze-icon.png';
@@ -6,25 +6,32 @@ import silverIcon from './assets/silver-icon.png';
 import goldIcon from './assets/gold-icon.png';
 import dullIcon from './assets/dull-icon.png'
 
-function MapView() {
-  console.log("KEYY",process.env)
+function MapView({ setIncidents }) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: 'AIzaSyCQxNdJeOBALdHCKwnuOaDJgCSyE0jEKrA'
   });
 
   const containerStyle = {
-    width: '1200px',
+    width: '650px',
     height: '950px'
   };
 
-  const [userLocation, setUserLocation] = React.useState(null);
-  const [center, setCenter] = React.useState({
-    lat: 40.7829,
-    lng: -73.9654,
-    zoom: 14,
+  const [userLocation, setUserLocation] = useState(null);
+  const [center, setCenter] = useState({
+    // lat: 37.773972,
+    // lng: -122.431297,
+    lat: '',
+    lng: '',
+    zoom: '', //changing the zoom value seems to alter the default starting location on the map
   });
-  const [selectedPlace, setSelectedPlace] = React.useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportDetails, setReportDetails] = useState({
+    gpsCoordinate: '',
+    description: '',
+    severity: '',
+  });
 
   const mapOptions = {
     styles: [
@@ -119,21 +126,61 @@ function MapView() {
         setCenter({
           lat: latitude,
           lng: longitude,
-          zoom: 14,
+          zoom: 15,
         });
       },
       (error) => console.error('Error fetching location', error)
     );
   }, []);
 
+  const handleReportButtonClick = () => {
+    setShowReportForm(true);
+    setReportDetails({
+      ...reportDetails,
+      gpsCoordinate: `${userLocation.lat}, ${userLocation.lng}`,
+    });
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setReportDetails({
+      ...reportDetails,
+      [name]: value,
+    });
+  };
+
+  const handleSubmitReport = (e) => {
+    e.preventDefault();
+    console.log("submitting report");
+    fetch('http://20.168.8.23:8080/api/report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        gpsCoordinate: reportDetails.gpsCoordinate,
+        description: reportDetails.description,
+        severity: reportDetails.severity,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        alert(data.message);
+        setShowReportForm(false);
+      })
+      .catch((error) => console.error('Error:', error));
+  };
+
+
   const [map, setMap] = React.useState(null);
 
-  const onLoad = React.useCallback(function callback(map) {
-    const bounds = new window.google.maps.LatLngBounds(center);
-    map.fitBounds(bounds);
+  // const onLoad = React.useCallback(function callback(map) {
+  //   const bounds = new window.google.maps.LatLngBounds(center);
+  //   map.fitBounds(bounds);
 
-    setMap(map);
-  }, []);
+  //   setMap(map);
+  // }, []);
 
   const onUnmount = React.useCallback(function callback(map) {
     setMap(null);
@@ -159,48 +206,184 @@ function MapView() {
       return goldIcon;
     }
   };
+
+
+  const fetchIncidents = (bounds) => {
+    if (!bounds) {
+      console.error('Map bounds are not available.');
+      return;
+    }
+
+    const topLeft = {
+      lat: bounds.getNorthEast().lat(),
+      lng: bounds.getSouthWest().lng(),
+    };
+    const bottomRight = {
+      lat: bounds.getSouthWest().lat(),
+      lng: bounds.getNorthEast().lng(),
+    };
+
+    console.log("Top Left:", topLeft);
+    console.log("Bottom Right:", bottomRight);
+
+    fetch('http://20.168.8.23:8080/api/get_problems', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        top_left: topLeft,
+        bottom_right: bottomRight,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setIncidents(data);  // Update the incidents in the parent component
+      })
+      .catch((error) => console.error('Error:', error));
+    // console.log("Incidents:", incidents);
+  };
+
+  const onLoad = useCallback((mapInstance) => {
+    setMap(mapInstance);
+
+    // Delay the fetch to ensure the bounds are ready
+    setTimeout(() => {
+      const bounds = mapInstance.getBounds();
+      fetchIncidents(bounds);
+    }, 1000); // Adjust delay as necessary
+  }, []);
+
+  const onBoundsChanged = useCallback(() => {
+    if (map) {
+      const bounds = map.getBounds();
+      fetchIncidents(bounds);
+    }
+  }, [map]);
   
 
-  return isLoaded ? (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={center}
-      zoom={center.zoom}
-      onLoad={onLoad}
-      onUnmount={onUnmount}
-      options={mapOptions}
-    >
-      {locations.map((location, i) => (
-        <Marker
-          key={i}
-          position={location.location}
-          title={location.name}
-          icon={getMarkerIcon(location.visits)}
-          onClick={() => handleMarkerClick(location)}
-        />
-      ))}
-      {userLocation && (
-        <Marker
-          position={userLocation}
-          icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }}
-        />
-      )}
-      {selectedPlace && (
-        <InfoWindow
-          position={selectedPlace.location}
-          onCloseClick={handleInfoWindowClose}
-        >
-          <div>
-            <h4>{selectedPlace.name}</h4>
-            <p>{selectedPlace.info}</p>
-            <p>Visits: {selectedPlace.visits}</p>
-          </div>
-        </InfoWindow>
-      )}
-    </GoogleMap>
-  ) : (
-    <></>
+  return (
+    <div style={{ display: 'flex' }}>
+      <div>
+        {isLoaded && (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={center.zoom}
+            options={mapOptions}
+            onLoad={onLoad}
+            // onBoundsChanged={onBoundsChanged}
+          >
+            {locations.map((location, i) => (
+              <Marker
+                key={i}
+                position={location.location}
+                title={location.name}
+              />
+            ))}
+            {userLocation && (
+              <Marker
+                position={userLocation}
+                icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }}
+              />
+            )}
+            {selectedPlace && (
+              <InfoWindow
+                position={selectedPlace.location}
+                onCloseClick={() => setSelectedPlace(null)}
+              >
+                <div>
+                  <h4>{selectedPlace.name}</h4>
+                  <p>{selectedPlace.info}</p>
+                </div>
+              </InfoWindow>
+            )}
+          </GoogleMap>
+        )}
+      </div>
+      <div style={{ marginLeft: '20px' }}>
+        <button onClick={handleReportButtonClick}>Create Report</button>
+        {showReportForm && (
+          <form onSubmit={handleSubmitReport} style={{ marginTop: '20px' }}>
+            <div>
+              <label>GPS Coordinate:</label>
+              <input
+                type="text"
+                name="gpsCoordinate"
+                value={reportDetails.gpsCoordinate}
+                readOnly
+              />
+            </div>
+            <div>
+              <label>Description:</label>
+              <textarea
+                name="description"
+                value={reportDetails.description}
+                onChange={handleFormChange}
+                required
+              />
+            </div>
+            <div>
+              <label>Severity:</label>
+              <select
+                name="severity"
+                value={reportDetails.severity}
+                onChange={handleFormChange}
+                required
+              >
+                <option value="">Select Severity</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <button type="submit">Submit Report</button>
+          </form>
+        )}
+      </div>
+    </div>
   );
+
+  // return isLoaded ? (
+  //   <GoogleMap
+  //     mapContainerStyle={containerStyle}
+  //     center={center}
+  //     zoom={center.zoom}
+  //     onLoad={onLoad}
+  //     onUnmount={onUnmount}
+  //     options={mapOptions}
+  //   >
+  //     {locations.map((location, i) => (
+  //       <Marker
+  //         key={i}
+  //         position={location.location}
+  //         title={location.name}
+  //         icon={getMarkerIcon(location.visits)}
+  //         onClick={() => handleMarkerClick(location)}
+  //       />
+  //     ))}
+  //     {userLocation && (
+  //       <Marker
+  //         position={userLocation}
+  //         icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }}
+  //       />
+  //     )}
+  //     {selectedPlace && (
+  //       <InfoWindow
+  //         position={selectedPlace.location}
+  //         onCloseClick={handleInfoWindowClose}
+  //       >
+  //         <div>
+  //           <h4>{selectedPlace.name}</h4>
+  //           <p>{selectedPlace.info}</p>
+  //           <p>Visits: {selectedPlace.visits}</p>
+  //         </div>
+  //       </InfoWindow>
+  //     )}
+  //   </GoogleMap>
+  // ) : (
+  //   <></>
+  // );
 }
 
 export default React.memo(MapView);

@@ -3,6 +3,7 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: beige;
+  color: black;
 }
 
 .content-container {
@@ -17,6 +18,18 @@
   flex-shrink: 0;
   border-top: 1px solid #ddd;
   background-color: tan;
+  color: black;
+}
+
+
+.bottom-menu-bar a {
+  color: black; /* Ensures links are black */
+  text-decoration: none; /* Optional: Remove underline from links */
+}
+
+/* Optional: Add hover effect for links */
+.bottom-menu-bar a:hover {
+  color: darkgray; /* Change link color on hover if needed */
 }
 
 .tab-content {
@@ -39,6 +52,7 @@
     bottom: 0;
     left: 0;
     width: 100%;
+    color: black;
     height: 56px; /* Adjust based on the height of your mobile device's bottom navigation bar */
     border: 1px solid #ddd;
     border-bottom: none;

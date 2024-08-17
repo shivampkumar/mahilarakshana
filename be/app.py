@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from flask_bcrypt import Bcrypt
 from pymongo import MongoClient
-from bson import ObjectId
+# from bson import ObjectId
 from urllib.parse import quote_plus
 import os
 from dotenv import load_dotenv
@@ -93,6 +93,9 @@ def get_problems():
         problem['_id'] = str(problem['_id'])
 
     return jsonify(problems), 200
+
+#set up endpoint to save trusted contacts:
+
 
 
 if __name__ == '__main__':
