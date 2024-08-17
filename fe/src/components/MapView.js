@@ -235,8 +235,8 @@ function MapView({ incidents, setIncidents }) {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <div>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem' }}>
+    <div style={{ flex: 1, minWidth: '300px' }}>
       {isLoaded && (
         <GoogleMap
           mapContainerStyle={containerStyle}
@@ -290,10 +290,10 @@ function MapView({ incidents, setIncidents }) {
         </GoogleMap>
       )}
     </div>
-    <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ marginLeft: '2%', flex: '0 1 300px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <button 
         onClick={handleReportButtonClick} 
-        style={{ marginBottom: '20px', padding: '10px 20px', fontSize: '16px' }}
+        style={{ marginBottom: '1rem', padding: '0.8rem 1.6rem', fontSize: '1rem' }}
       >
         Create Report
       </button>
@@ -301,19 +301,20 @@ function MapView({ incidents, setIncidents }) {
         style={{
           backgroundColor: 'red',
           color: 'white',
-          padding: '10px 20px',
-          fontSize: '16px',
+          padding: '0.8rem 1.6rem',
+          fontSize: '1rem',
           fontWeight: 'bold',
           border: 'none',
           cursor: 'pointer',
-          borderRadius: '5px'
+          borderRadius: '0.5rem',
+          marginBottom: '1rem'
         }}
         onClick={handleSOSClick}
       >
         SOS
       </button>
       {showReportForm && (
-        <form onSubmit={handleSubmitReport} style={{ marginTop: '20px', width: '100%', textAlign: 'center' }}>
+        <form onSubmit={handleSubmitReport} style={{ width: '100%', textAlign: 'center' }}>
           <div>
             <label>GPS Coordinate:</label>
             <input
@@ -321,7 +322,7 @@ function MapView({ incidents, setIncidents }) {
               name="gpsCoordinate"
               value={reportDetails.gpsCoordinate}
               onChange={handleFormChange}
-              style={{ width: '100%', marginBottom: '10px' }}
+              style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
             />
           </div>
           <div>
@@ -331,7 +332,7 @@ function MapView({ incidents, setIncidents }) {
               value={reportDetails.description}
               onChange={handleFormChange}
               required
-              style={{ width: '100%', marginBottom: '10px' }}
+              style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
             />
           </div>
           <div>
@@ -341,7 +342,7 @@ function MapView({ incidents, setIncidents }) {
               value={reportDetails.severity}
               onChange={handleFormChange}
               required
-              style={{ width: '100%', marginBottom: '10px' }}
+              style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
             >
               <option value="">Select Severity</option>
               <option value="low">Low</option>
@@ -349,7 +350,7 @@ function MapView({ incidents, setIncidents }) {
               <option value="high">High</option>
             </select>
           </div>
-          <button type="submit" style={{ padding: '10px 20px' }}>Submit Report</button>
+          <button type="submit" style={{ padding: '0.8rem 1.6rem' }}>Submit Report</button>
         </form>
       )}
     </div>
