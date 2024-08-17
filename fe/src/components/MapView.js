@@ -18,7 +18,7 @@ function MapView({ incidents, setIncidents }) {
   const [center, setCenter] = useState({
     lat: '',
     lng: '',
-    zoom: 15, // Default zoom value
+    zoom: 20, // Default zoom value
   });
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
@@ -61,7 +61,7 @@ function MapView({ incidents, setIncidents }) {
               setCenter({
                 lat: latitude,
                 lng: longitude,
-                zoom: 15,
+                zoom: 20,
               });
               return {
                 lat: latitude,
@@ -320,7 +320,7 @@ function MapView({ incidents, setIncidents }) {
               type="text"
               name="gpsCoordinate"
               value={reportDetails.gpsCoordinate}
-              readOnly
+              onChange={handleFormChange}
               style={{ width: '100%', marginBottom: '10px' }}
             />
           </div>
