@@ -235,7 +235,7 @@ function MapView({ incidents, setIncidents }) {
   };
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
     <div>
       {isLoaded && (
         <GoogleMap
@@ -290,8 +290,13 @@ function MapView({ incidents, setIncidents }) {
         </GoogleMap>
       )}
     </div>
-    <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column' }}>
-      <button onClick={handleReportButtonClick} style={{ marginBottom: '20px' }}>Create Report</button>
+    <div style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <button 
+        onClick={handleReportButtonClick} 
+        style={{ marginBottom: '20px', padding: '10px 20px', fontSize: '16px' }}
+      >
+        Create Report
+      </button>
       <button
         style={{
           backgroundColor: 'red',
@@ -308,7 +313,7 @@ function MapView({ incidents, setIncidents }) {
         SOS
       </button>
       {showReportForm && (
-        <form onSubmit={handleSubmitReport} style={{ marginTop: '20px' }}>
+        <form onSubmit={handleSubmitReport} style={{ marginTop: '20px', width: '100%', textAlign: 'center' }}>
           <div>
             <label>GPS Coordinate:</label>
             <input
@@ -316,6 +321,7 @@ function MapView({ incidents, setIncidents }) {
               name="gpsCoordinate"
               value={reportDetails.gpsCoordinate}
               readOnly
+              style={{ width: '100%', marginBottom: '10px' }}
             />
           </div>
           <div>
@@ -325,6 +331,7 @@ function MapView({ incidents, setIncidents }) {
               value={reportDetails.description}
               onChange={handleFormChange}
               required
+              style={{ width: '100%', marginBottom: '10px' }}
             />
           </div>
           <div>
@@ -334,6 +341,7 @@ function MapView({ incidents, setIncidents }) {
               value={reportDetails.severity}
               onChange={handleFormChange}
               required
+              style={{ width: '100%', marginBottom: '10px' }}
             >
               <option value="">Select Severity</option>
               <option value="low">Low</option>
@@ -341,7 +349,7 @@ function MapView({ incidents, setIncidents }) {
               <option value="high">High</option>
             </select>
           </div>
-          <button type="submit">Submit Report</button>
+          <button type="submit" style={{ padding: '10px 20px' }}>Submit Report</button>
         </form>
       )}
     </div>
