@@ -1,14 +1,27 @@
 import React from 'react';
-import { Card, ListGroup, ProgressBar, Button, Row, Col } from 'react-bootstrap';
+import { Card, ListGroup, Button, Row, Col } from 'react-bootstrap';
+import axios from 'axios';
 import './Achievements.css';
 
-import bronzeIcon from './assets/bronze-icon.png';
-import silverIcon from './assets/silver-icon.png';
-import goldIcon from './assets/gold-icon.png';
-import dullIcon from './assets/dull-icon.png';
-
 function Achievements({ incidents }) {
-  console.log("incidents", incidents)
+  const handleUpvote = async (reportId) => {
+    try {
+      await axios.post(`http://20.168.8.23:8080/api/upvote/${reportId}`, { user_id: localStorage.getItem('user_id') });
+      // Optionally, refresh the list of incidents or update the UI to reflect the upvote
+    } catch (error) {
+      console.error('Error upvoting the report', error);
+    }
+  };
+
+  const handleDownvote = async (reportId) => {
+    try {
+      await axios.post(`http://20.168.8.23:8080/api/downvote/${reportId}`, { user_id: localStorage.getItem('user_id') });
+      // Optionally, refresh the list of incidents or update the UI to reflect the downvote
+    } catch (error) {
+      console.error('Error downvoting the report', error);
+    }
+  };
+
   return (
     <div className="achievements-container">
       <Card className="mt-4">
@@ -20,26 +33,38 @@ function Achievements({ incidents }) {
                 <div className="incident-item">
                   <Row className="mb-2">
                     <Col xs={12} md={6}>
-                      <strong>Location:</strong> 
+                      <strong>Location:</strong>
                       <br />
                       Lat: {incident.gpsCoordinate[1]}, Lng: {incident.gpsCoordinate[0]}
                     </Col>
                     <Col xs={12} md={6}>
-                      <strong>Severity:</strong> 
+                      <strong>Severity:</strong>
                       <br />
                       {incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}
                     </Col>
                   </Row>
                   <Row className="mb-2">
                     <Col xs={12}>
-                      <strong>Description:</strong> 
+                      <strong>Description:</strong>
                       <br />
                       {incident.description}
                     </Col>
                   </Row>
+                  <Row className="mb-2">
+                    <Col xs={6}>
+                      <Button variant="success" onClick={() => handleUpvote(incident._id)}>
+                        Upvote ({incident.upvotes || 0})
+                      </Button>
+                    </Col>
+                    <Col xs={6}>
+                      <Button variant="danger" onClick={() => handleDownvote(incident._id)}>
+                        Downvote ({incident.downvotes || 0})
+                      </Button>
+                    </Col>
+                  </Row>
                   <Row>
                     <Col xs={12}>
-                      <strong>Timestamp:</strong> 
+                      <strong>Timestamp:</strong>
                       <br />
                       {new Date(incident.timestamp).toLocaleString()}
                     </Col>
@@ -54,76 +79,6 @@ function Achievements({ incidents }) {
       </Card>
     </div>
   );
-
-  // const milestones = [
-  //   { name: 'Bethesda Fountain', count: 5 },
-  //   { name: 'Belvedere Castle', count: 3 },
-  //   { name: 'Central Park Zoo', count: 2 },
-  //   { name: 'Strawberry Fields', count: 4 },
-  //   { name: 'The Ramble', count: 1 },
-  // ];
-
-  // const getMilestoneIcon = (count) => {
-  //   if (count === 0) {
-  //     return dullIcon;
-  //   } else if (count < 5) {
-  //     return bronzeIcon;
-  //   } else if (count < 10) {
-  //     return silverIcon;
-  //   } else {
-  //     return goldIcon;
-  //   }
-  // };
-
-  // const tasks = [
-  //   { name: 'Visit Bow Bridge', points: 10, progress: 50 },
-  //   { name: 'Complete a 5-mile walk', points: 15, progress: 75 },
-  //   { name: 'Explore the Conservatory Garden', points: 20, progress: 25 },
-  //   { name: 'Claim Reward Task', points: 30, progress: 100 },
-  // ];
-
-  // return (
-  //   <div className="achievements-container">
-  //     <Card>
-  //       <Card.Header as="h2">Visits</Card.Header>
-  //       <ListGroup variant="flush">
-  //         {milestones.map((milestone, index) => (
-  //           <ListGroup.Item key={index}>
-  //             <div className="milestone-item">
-  //               <img
-  //                 src={getMilestoneIcon(milestone.count)}
-  //                 alt={`${milestone.name} Icon`}
-  //                 className="milestone-icon"
-  //               />
-  //               <span className="milestone-name">{milestone.name}</span>
-  //               <span className="milestone-count">{milestone.count}</span>
-  //             </div>
-  //           </ListGroup.Item>
-  //         ))}
-  //       </ListGroup>
-  //     </Card>
-
-  //     <Card>
-  //       <Card.Header as="h2">In Progress Tasks</Card.Header>
-  //       <ListGroup variant="flush">
-  //         {tasks.map((task, index) => (
-  //           <ListGroup.Item key={index}>
-  //             <div className="task-item">
-  //               <span className="task-name">{task.name}</span>
-  //               <span className="task-points">{task.points} points</span>
-  //               {task.progress === 100 && (
-  //                 <Button variant="success" className="claim-button">
-  //                   Claim Reward
-  //                 </Button>
-  //               )}
-  //             </div>
-  //             <ProgressBar now={task.progress} label={`${task.progress}%`} />
-  //           </ListGroup.Item>
-  //         ))}
-  //       </ListGroup>
-  //     </Card>
-  //   </div>
-  // );
 }
 
 export default Achievements;

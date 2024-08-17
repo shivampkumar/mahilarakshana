@@ -75,12 +75,13 @@ def report():
     coordinates = [coordinates[1], coordinates[0]]
     print("coordinates",coordinates)
     report_data['gpsCoordinate'] = coordinates
-    report_data['timestamp'] = datetime.utcnow()  # Store the current timestamp 
-    print("report_data",report_data)
+    report_data['timestamp'] = datetime.utcnow()  # Store the current timestamp
+    report_data['upvotes'] = 0  # Initialize upvotes
+    report_data['downvotes'] = 0  # Initialize downvotes
+    print("report_data", report_data)
     # Insert the report into the 'reports' collection
     reports.insert_one(report_data)
     return jsonify({'message': 'Report submitted successfully'}), 201
-
 
 @app.route('/api/get_problems', methods=['POST'])
 @cross_origin()
@@ -110,6 +111,50 @@ def get_problems():
     return jsonify(problems), 200
 
 #set up endpoint to save trusted contacts:
+@app.route('/api/upvote/<report_id>', methods=['POST'])
+@cross_origin()
+def upvote(report_id):
+    user_id = request.json.get('user_id')
+    report = reports.find_one({'_id': ObjectId(report_id)})
+
+    if not report:
+        return jsonify({'message': 'Report not found'}), 404
+
+    # Avoid double voting (optional feature)
+    if user_id in report.get('upvoters', []):
+        return jsonify({'message': 'You have already upvoted this report'}), 400
+
+    reports.update_one(
+        {'_id': ObjectId(report_id)},
+        {
+            '$inc': {'upvotes': 1},
+            '$addToSet': {'upvoters': user_id}  # Add user_id to the upvoters list
+        }
+    )
+    return jsonify({'message': 'Upvote successful'}), 200
+
+
+@app.route('/api/downvote/<report_id>', methods=['POST'])
+@cross_origin()
+def downvote(report_id):
+    user_id = request.json.get('user_id')
+    report = reports.find_one({'_id': ObjectId(report_id)})
+
+    if not report:
+        return jsonify({'message': 'Report not found'}), 404
+
+    # Avoid double voting (optional feature)
+    if user_id in report.get('downvoters', []):
+        return jsonify({'message': 'You have already downvoted this report'}), 400
+
+    reports.update_one(
+        {'_id': ObjectId(report_id)},
+        {
+            '$inc': {'downvotes': 1},
+            '$addToSet': {'downvoters': user_id}  # Add user_id to the downvoters list
+        }
+    )
+    return jsonify({'message': 'Downvote successful'}), 200
 
 
 

@@ -3,8 +3,6 @@ import { Tabs, Tab } from 'react-bootstrap';
 import './App.css';
 import MapView from './components/MapView';
 import Achievements from './components/Achievements';
-import Store from './components/Store';
-import ParkGpt from './components/ParkGpt';
 import Login from './components/Login';
 import Register from './components/Register';
 import axios from 'axios';
@@ -93,18 +91,6 @@ function App() {
               <Achievements incidents={incidents}></Achievements>
             </div>
           </Tab>
-          {/* <Tab eventKey="trustedcontacts" title="Contacts">
-            <div className="tab-content">
-              <h2>Emergency Contacts</h2>
-              <Store></Store>
-            </div>
-          </Tab> */}
-          {/* <Tab eventKey="parkgpt" title="ParkGPT">
-            <div className="tab-content">
-              <h2>ParkGPT</h2>
-              <ParkGpt/>
-            </div>
-          </Tab> */}
         </Tabs>
       );
     }

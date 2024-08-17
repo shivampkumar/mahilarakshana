@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
+import axios from 'axios';
 
 function MapView({ incidents, setIncidents }) {
   const { isLoaded } = useJsApiLoader({
@@ -95,6 +96,24 @@ function MapView({ incidents, setIncidents }) {
       ...reportDetails,
       [name]: value,
     });
+  };
+
+  const handleUpvote = async (reportId) => {
+    try {
+      await axios.post(`http://20.168.8.23:8080/api/upvote/${reportId}`, { user_id: localStorage.getItem('user_id') });
+      // Optionally, refresh the list of incidents or update the UI to reflect the upvote
+    } catch (error) {
+      console.error('Error upvoting the report', error);
+    }
+  };
+
+  const handleDownvote = async (reportId) => {
+    try {
+      await axios.post(`http://20.168.8.23:8080/api/downvote/${reportId}`, { user_id: localStorage.getItem('user_id') });
+      // Optionally, refresh the list of incidents or update the UI to reflect the downvote
+    } catch (error) {
+      console.error('Error downvoting the report', error);
+    }
   };
 
   const handleSubmitReport = (e) => {
@@ -238,6 +257,10 @@ function MapView({ incidents, setIncidents }) {
                   <h4>{selectedIncident.description}</h4>
                   <p>Severity: {selectedIncident.severity}</p>
                   <p>Timestamp: {new Date(selectedIncident.timestamp).toLocaleString()}</p>
+                  <p>Upvotes: {selectedIncident.upvotes || 0}</p>
+                  <p>Downvotes: {selectedIncident.downvotes || 0}</p>
+                  <button onClick={() => handleUpvote(selectedIncident._id)}>Upvote</button>
+                  <button onClick={() => handleDownvote(selectedIncident._id)}>Downvote</button>
                 </div>
               </InfoWindow>
             )}
