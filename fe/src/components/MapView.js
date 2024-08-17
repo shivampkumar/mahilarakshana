@@ -1,10 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
-import Icon1 from './assets/download.png';
-import bronzeIcon from './assets/bronze-icon.png';
-import silverIcon from './assets/silver-icon.png';
-import goldIcon from './assets/gold-icon.png';
-import dullIcon from './assets/dull-icon.png';
 
 function MapView({ incidents, setIncidents }) {
   const { isLoaded } = useJsApiLoader({
@@ -30,6 +25,8 @@ function MapView({ incidents, setIncidents }) {
     description: '',
     severity: '',
   });
+  
+  const previousBounds = useRef(null);
 
   const mapOptions = {
     styles: [
@@ -47,21 +44,41 @@ function MapView({ incidents, setIncidents }) {
   };
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({
-          lat: latitude,
-          lng: longitude,
-        });
-        setCenter({
-          lat: latitude,
-          lng: longitude,
-          zoom: 15,
-        });
-      },
-      (error) => console.error('Error fetching location', error)
-    );
+    let watchId;
+
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          setUserLocation((prevLocation) => {
+            if (
+              !prevLocation ||
+              (prevLocation.lat !== latitude || prevLocation.lng !== longitude)
+            ) {
+              setCenter({
+                lat: latitude,
+                lng: longitude,
+                zoom: 15,
+              });
+              return {
+                lat: latitude,
+                lng: longitude,
+              };
+            }
+            return prevLocation;
+          });
+        },
+        (error) => console.error('Error fetching location', error),
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+      );
+    }
+
+    return () => {
+      if (navigator.geolocation && watchId !== undefined) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
   }, []);
 
   const handleReportButtonClick = () => {
@@ -106,19 +123,46 @@ function MapView({ incidents, setIncidents }) {
   const [map, setMap] = useState(null);
   const [selectedIncident, setSelectedIncident] = useState(null);
 
+  const boundsAreDifferent = (newBounds) => {
+    if (!previousBounds.current) return true;
+    
+    const { north, south, east, west } = newBounds;
+    const previous = previousBounds.current;
+
+    return (
+      north !== previous.north ||
+      south !== previous.south ||
+      east !== previous.east ||
+      west !== previous.west
+    );
+  };
+
   const fetchIncidents = useCallback((bounds) => {
     if (!bounds) {
       console.error('Map bounds are not available.');
       return;
     }
 
+    const newBounds = {
+      north: bounds.getNorthEast().lat(),
+      south: bounds.getSouthWest().lat(),
+      east: bounds.getNorthEast().lng(),
+      west: bounds.getSouthWest().lng(),
+    };
+
+    if (!boundsAreDifferent(newBounds)) {
+      return;
+    }
+
+    previousBounds.current = newBounds;
+
     const topLeft = {
-      lat: bounds.getNorthEast().lat(),
-      lng: bounds.getSouthWest().lng(),
+      lat: newBounds.north,
+      lng: newBounds.west,
     };
     const bottomRight = {
-      lat: bounds.getSouthWest().lat(),
-      lng: bounds.getNorthEast().lng(),
+      lat: newBounds.south,
+      lng: newBounds.east,
     };
 
     console.log("Top Left:", topLeft);
