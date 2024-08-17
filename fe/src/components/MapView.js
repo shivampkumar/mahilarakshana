@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import axios from 'axios';
+import cautionIcon from './assets/cautionicon.jpg';
 
 function MapView({ incidents, setIncidents }) {
   const { isLoaded } = useJsApiLoader({
@@ -244,6 +245,7 @@ function MapView({ incidents, setIncidents }) {
               <Marker
                 key={index}
                 position={{ lat: incident.gpsCoordinate[1], lng: incident.gpsCoordinate[0] }}
+                icon={cautionIcon}
                 onClick={() => handleMarkerClick(incident)}
               />
             ))}
